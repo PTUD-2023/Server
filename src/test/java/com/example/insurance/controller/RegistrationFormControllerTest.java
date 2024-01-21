@@ -2,6 +2,7 @@ package com.example.insurance.controller;
 
 import com.example.insurance.common.CustomErrorResponse;
 import com.example.insurance.common.CustomSuccessResponse;
+import com.example.insurance.dto.NewRegistrationForm;
 import com.example.insurance.entity.*;
 import com.example.insurance.service.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +56,7 @@ class RegistrationFormControllerTest {
     public void testCreateRegistrationForm_WithValidInput() {
         // Arrange
         String token = "Bearer mockToken"; //Token == null and token start with Bearer
-        RegistrationFormController.NewRegistrationForm newRegistrationForm = mock(RegistrationFormController.NewRegistrationForm.class);
+        NewRegistrationForm newRegistrationForm = mock(NewRegistrationForm.class);
         InsuredPerson insuredPerson = mock(InsuredPerson.class);
         HealthInformation healthInformation = mock(HealthInformation.class);
         InsuranceInformation insuranceInformation = mock(InsuranceInformation.class);
@@ -103,7 +104,7 @@ class RegistrationFormControllerTest {
     public void testCreateRegistrationForm_WithInvalidToken() {
         // Arrange
         String invalidToken = "InvalidToken";
-        RegistrationFormController.NewRegistrationForm newRegistrationForm = mock(RegistrationFormController.NewRegistrationForm.class);
+        NewRegistrationForm newRegistrationForm = mock(NewRegistrationForm.class);
 
         // Act
         ResponseEntity<?> responseEntity = registrationFormController.createRegistrationForm(invalidToken, newRegistrationForm);
@@ -117,7 +118,7 @@ class RegistrationFormControllerTest {
     public void testCreateRegistrationForm_WithMissingUser() {
         // Arrange
         String validToken = "Bearer mockToken";
-        RegistrationFormController.NewRegistrationForm newRegistrationForm = mock(RegistrationFormController.NewRegistrationForm.class);
+        NewRegistrationForm newRegistrationForm = mock(NewRegistrationForm.class);
 
         when(jwtService.extractUsername(anyString())).thenReturn("mockEmail");
         when(userAccountService.getUserByEmail(anyString())).thenReturn(Optional.empty());
@@ -137,7 +138,7 @@ class RegistrationFormControllerTest {
     public void testCreateRegistrationForm_WithInvalidHealthInformation() {
         // Arrange
         String validToken = "Bearer mockToken";
-        RegistrationFormController.NewRegistrationForm newRegistrationForm = mock(RegistrationFormController.NewRegistrationForm.class);
+        NewRegistrationForm newRegistrationForm = mock(NewRegistrationForm.class);
         HealthInformation healthInformation = mock(HealthInformation.class);
 
         when(newRegistrationForm.getInsuredPerson()).thenReturn(mock(InsuredPerson.class));
@@ -171,7 +172,7 @@ class RegistrationFormControllerTest {
     public void testCreateRegistrationForm_WithInvalidInsuranceInformation() {
         // Arrange
         String validToken = "Bearer mockToken";
-        RegistrationFormController.NewRegistrationForm newRegistrationForm = mock(RegistrationFormController.NewRegistrationForm.class);
+        NewRegistrationForm newRegistrationForm = mock(NewRegistrationForm.class);
         HealthInformation healthInformation = mock(HealthInformation.class);
 
         when(newRegistrationForm.getInsuredPerson()).thenReturn(mock(InsuredPerson.class));
@@ -205,7 +206,7 @@ class RegistrationFormControllerTest {
     public void testCreateRegistrationForm_WithInvalidInsuredPerson() {
         // Arrange
         String validToken = "Bearer mockToken";
-        RegistrationFormController.NewRegistrationForm newRegistrationForm = mock(RegistrationFormController.NewRegistrationForm.class);
+        NewRegistrationForm newRegistrationForm = mock(NewRegistrationForm.class);
         HealthInformation healthInformation = mock(HealthInformation.class);
 
         when(newRegistrationForm.getInsuredPerson()).thenReturn(mock(InsuredPerson.class));

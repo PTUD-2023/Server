@@ -112,7 +112,6 @@ public class RegistrationFormController {
         return ResponseEntity.status(HttpStatus.OK).body(registrationFormService.getAllRegistrationForm(pageable));
     }
 
-<<<<<<< HEAD
     @PatchMapping("/approve/{id}")
     public ResponseEntity<?> approveRegistrationForm(@PathVariable Long id) {
         RegistrationForm registrationForm = registrationFormService.updateStatusRegistrationForm(id,"approved");
@@ -125,15 +124,6 @@ public class RegistrationFormController {
 
         else
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(HttpStatus.BAD_REQUEST.value(),"CannotApproved","Cannot approve registration form",new Date()));
-=======
-    @Getter
-    @Setter
-    public static class NewRegistrationForm {
-        private InsuredPerson insuredPerson;
-        private HealthInformation healthInformation;
-        private InsuranceInformation insuranceInformation;
-        private String note;
->>>>>>> ef7c9815591804a1455746f7b759cce2349f06ea
     }
 
     @PatchMapping("/refuse/{id}")
