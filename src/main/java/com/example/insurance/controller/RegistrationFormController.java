@@ -111,7 +111,7 @@ public class RegistrationFormController {
 
     @Getter
     @Setter
-    private static class NewRegistrationForm {
+    public static class NewRegistrationForm {
         private InsuredPerson insuredPerson;
         private HealthInformation healthInformation;
         private InsuranceInformation insuranceInformation;
