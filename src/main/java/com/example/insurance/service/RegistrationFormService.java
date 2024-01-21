@@ -44,4 +44,15 @@ public class RegistrationFormService {
     public Page<RegistrationForm> getAllRegistrationForm(Pageable pageable) {
         return registrationFormRepository.findAll(pageable);
     }
+
+    public RegistrationForm updateStatusRegistrationForm(Long id, String status) {
+        RegistrationForm registrationForm = registrationFormRepository.findById(id).orElse(null);
+        if(registrationForm != null && registrationForm.getStatus().equals("pending")) {
+            registrationForm.setStatus(status);
+            registrationFormRepository.save(registrationForm);
+            return registrationForm;
+        }
+        return null;
+    }
+
 }

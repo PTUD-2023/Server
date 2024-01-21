@@ -2,6 +2,7 @@ package com.example.insurance.controller;
 
 import com.example.insurance.common.CustomErrorResponse;
 import com.example.insurance.common.CustomSuccessResponse;
+import com.example.insurance.common.ReadEmailTemplate;
 import com.example.insurance.component.Base64Encoding;
 import com.example.insurance.dto.ConfirmCodeRequest;
 import com.example.insurance.dto.SignUpRequest;
@@ -23,11 +24,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Optional;
 
@@ -115,7 +113,8 @@ public class AuthController {
         String to = userAccount.getEmail();
         String subject =confirmCode.getCode()+ " là mã xác nhận của bạn";
         StringBuilder body = new StringBuilder();
-        String htmlContent = readEmailTemplate();
+        Resource resource = new ClassPathResource("static/emailTemplate.html");
+        String htmlContent = ReadEmailTemplate.read(resource);
         htmlContent = htmlContent.replace("${lastName}",userAccount.getLastName());
         htmlContent = htmlContent.replace("${email}",userAccount.getEmail());
         htmlContent = htmlContent.replace("${code}",confirmCode.getCode());
@@ -179,18 +178,6 @@ public class AuthController {
         confirmCodeService.deleteAllByUserAccount(userAccount.get());
         sendConfirmCodeEmail(userAccount.get());
         return ResponseEntity.ok().body(new CustomSuccessResponse("Resend confirmation code successfully"));
-    }
-
-    private String readEmailTemplate() {
-        Resource resource = new ClassPathResource("static/emailTemplate.html");
-        try {
-            byte[] byteData = FileCopyUtils.copyToByteArray(resource.getInputStream());
-            return new String(byteData, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            // Xử lý lỗi
-            System.out.println(e.getMessage());
-            return ""; // Hoặc trả về một giá trị mặc định
-        }
     }
 
 }

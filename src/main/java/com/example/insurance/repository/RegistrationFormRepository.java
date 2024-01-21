@@ -13,4 +13,5 @@ public interface RegistrationFormRepository extends CrudRepository<RegistrationF
 
     List<RegistrationForm> findByUserAccountId(Long id);
     Page<RegistrationForm> findAll(Pageable pageable);
+
 }

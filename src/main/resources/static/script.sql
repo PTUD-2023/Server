@@ -153,14 +153,12 @@ create table insurance_contract
     start_date date not null,
     end_date date not null,
     registration_form_id bigint not null,
-    insurance_information_id bigint,
     payment_status varchar(20) default 'not_paid_enough', -- completed or not_paid_enough
     payment_type varchar(20) default 'pay_one_times', -- pay_monthly hoặc pay_one_times
     created_at timestamp              default current_timestamp                             null,
     updated_at timestamp              default current_timestamp on update current_timestamp null,
     status varchar(20) default 'activated',
-    foreign key (registration_form_id) references registration_form(id),
-    foreign key (insurance_information_id) references insurance_information(id)
+    foreign key (registration_form_id) references registration_form(id)
 );
 
 create table insurance_payment
@@ -169,11 +167,11 @@ create table insurance_payment
     amount int not null,
     payment_date date not null,
     payment_method varchar(20) not null,
-    insurance_contract_id bigint not null,
+    registration_form_id bigint not null,
     created_at timestamp              default current_timestamp                             null,
     updated_at timestamp              default current_timestamp on update current_timestamp null,
     status varchar(20) default 'unpaid',
-    foreign key (insurance_contract_id) references insurance_contract(id)
+    foreign key (registration_form_id) references registration_form(id)
 );
 
 create table insurance_plan_price
