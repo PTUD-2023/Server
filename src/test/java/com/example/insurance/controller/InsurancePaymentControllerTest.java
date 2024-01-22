@@ -3,7 +3,9 @@ package com.example.insurance.controller;
 import com.example.insurance.common.CustomErrorResponse;
 import com.example.insurance.common.CustomSuccessResponse;
 import com.example.insurance.entity.InsurancePayment;
+import com.example.insurance.entity.RegistrationForm;
 import com.example.insurance.entity.UserAccount;
+import com.example.insurance.service.InsuranceContractService;
 import com.example.insurance.service.InsurancePaymentService;
 import com.example.insurance.service.JwtService;
 import com.example.insurance.service.UserAccountService;
@@ -32,6 +34,8 @@ class InsurancePaymentControllerTest {
     private JwtService jwtService;
     @Mock
     private UserAccountService userAccountService;
+    @Mock
+    private InsuranceContractService insuranceContractService;
     @InjectMocks
     private InsurancePaymentController insurancePaymentController;
 
@@ -102,97 +106,150 @@ class InsurancePaymentControllerTest {
         verify(insurancePaymentService, times(0)).getInsurancePaymentByUserAccountId(anyLong(), any(Pageable.class));
     }
 
-//    @Test
-//    void payInsurancePayment_WithValidInput_ShouldReturnSuccessResponse() {
-//        // Arrange
-//        String method = "credit card";
-//        InsurancePayment insurancePayment = mock(InsurancePayment.class);
-//        Map<String, Object> requestBody = new HashMap<>();
-//        requestBody.put("method", method);
-//
-//        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(insurancePayment);
-//        when(insurancePayment.getStatus()).thenReturn("unpaid");
-//        when(insurancePaymentService.updateInsurancePayment(insurancePayment)).thenReturn(true);
-//
-//        // Act
-//        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(1L, requestBody);
-//
-//        // Assert
-//        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-//        assertThat(responseEntity.getBody())
-//                .isInstanceOf(CustomSuccessResponse.class)
-//                .extracting("message", "key")
-//                .containsExactly("Payment successfully", "PaymentSuccess");
-//
-//        // Verify
-//        verify(insurancePayment).setPaymentDate(any(Date.class));
-//        verify(insurancePayment).setPaymentMethod(anyString());
-//        verify(insurancePayment).setStatus(anyString());
-//    }
+    @Test
+    void payInsurancePayment_WithValidInput_ShouldReturnSuccessResponse() {
+        // Arrange
+        String token = "Bearer validToken";
+        String method = "credit card";
+        InsurancePayment insurancePayment = mock(InsurancePayment.class);
+        RegistrationForm registrationForm = mock(RegistrationForm.class);
 
-//    @Test
-//    void payInsurancePayment_WithInsurancePaymentDoesNotExist_ShouldReturnNotFoundResponse() {
-//        // Arrange
-//        String method = "credit card";
-//        Map<String, Object> requestBody = new HashMap<>();
-//        requestBody.put("method", method);
-//
-//        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(null);
-//
-//        // Act
-//        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(1L, requestBody);
-//
-//        // Assert
-//        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-//        assertThat(responseEntity.getBody())
-//                .isInstanceOf(CustomErrorResponse.class)
-//                .extracting("statusCode", "errorKey", "message")
-//                .containsExactly(HttpStatus.NOT_FOUND.value(),"InsurancePaymentNotFound","Could not find the insurance payment corresponding to the id");
-//    }
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("method", method);
 
-//    @Test
-//    void payInsurancePayment_WithInsurancePaymentExistsAndStatusNotUnpaid_ShouldReturnBadRequestResponse() {
-//        // Arrange
-//        String method = "credit card";
-//        InsurancePayment insurancePayment = mock(InsurancePayment.class);
-//        Map<String, Object> requestBody = new HashMap<>();
-//        requestBody.put("method", method);
-//
-//        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(insurancePayment);
-//        when(insurancePayment.getStatus()).thenReturn("paid");
-//
-//        // Act
-//        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(1L, requestBody);
-//
-//        // Assert
-//        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-//        assertThat(responseEntity.getBody())
-//                .isInstanceOf(CustomErrorResponse.class)
-//                .extracting("statusCode", "errorKey", "message")
-//                .containsExactly(HttpStatus.BAD_REQUEST.value(),"PaymentAlreadyPaid","The insurance payment has already been paid");
-//    }
+        String email = "test@example.com";
+        UserAccount userAccount = mock(UserAccount.class);
+        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(insurancePayment);
+        when(jwtService.extractUsername(token.substring(7))).thenReturn(email);
+        when(userAccountService.getUserByEmail(email)).thenReturn(Optional.of(userAccount));
+        Long userAccountId = 1L;
+        when(userAccount.getId()).thenReturn(userAccountId);
 
-//    @Test
-//    void payInsurancePayment_InternalErrorWhenUpdating_ShouldReturnInternalServerErrorResponse() {
-//        // Arrange
-//        String method = "credit card";
-//        InsurancePayment insurancePayment = mock(InsurancePayment.class);
-//        Map<String, Object> requestBody = new HashMap<>();
-//        requestBody.put("method", method);
-//
-//        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(insurancePayment);
-//        when(insurancePayment.getStatus()).thenReturn("unpaid");
-//        when(insurancePaymentService.updateInsurancePayment(insurancePayment)).thenReturn(false);
-//
-//        // Act
-//        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(1L, requestBody);
-//
-//        /// Assert
-//        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-//        assertThat(responseEntity.getBody())
-//                .isInstanceOf(CustomErrorResponse.class)
-//                .extracting("statusCode", "errorKey", "message")
-//                .containsExactly(HttpStatus.INTERNAL_SERVER_ERROR.value(),"InternalServerError","Could not update the insurance payment");
-//
-//    }
+        when(insurancePayment.getStatus()).thenReturn("unpaid");
+        when(insurancePaymentService.updateInsurancePayment(insurancePayment)).thenReturn(true);
+        when(insurancePayment.getRegistrationForm()).thenReturn(registrationForm);
+
+        // Act
+        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(token, 1L, requestBody);
+
+        // Assert
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody())
+                .isInstanceOf(CustomSuccessResponse.class)
+                .extracting("message", "key")
+                .containsExactly("Payment successfully", "PaymentSuccess");
+
+        // Verify
+        verify(insurancePayment).setPaymentDate(any(Date.class));
+        verify(insurancePayment).setPaymentMethod(anyString());
+        verify(insurancePayment).setStatus(anyString());
+        verify(insuranceContractService).createInsuranceContract(any());
+    }
+
+    @Test
+    void payInsurancePayment_WithInsurancePaymentDoesNotExist_ShouldReturnNotFoundResponse() {
+        // Arrange
+        String token = "Bearer validToken";
+        String method = "credit card";
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("method", method);
+
+        String email = "test@example.com";
+        UserAccount userAccount = mock(UserAccount.class);
+
+        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(null);
+        when(jwtService.extractUsername(token.substring(7))).thenReturn(email);
+        when(userAccountService.getUserByEmail(email)).thenReturn(Optional.of(userAccount));
+        // Act
+        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(token, 1L, requestBody);
+
+        // Assert
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(responseEntity.getBody())
+                .isInstanceOf(CustomErrorResponse.class)
+                .extracting("statusCode", "errorKey", "message")
+                .containsExactly(HttpStatus.NOT_FOUND.value(),"InsurancePaymentNotFound","Could not find the insurance payment corresponding to the id");
+    }
+
+    @Test
+    void payInsurancePayment_WithInsurancePaymentExistsAndStatusNotUnpaid_ShouldReturnBadRequestResponse() {
+        // Arrange
+        String token = "Bearer validToken";
+        String method = "credit card";
+        InsurancePayment insurancePayment = mock(InsurancePayment.class);
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("method", method);
+        String email = "test@example.com";
+        UserAccount userAccount = mock(UserAccount.class);
+
+        when(jwtService.extractUsername(token.substring(7))).thenReturn(email);
+        when(userAccountService.getUserByEmail(email)).thenReturn(Optional.of(userAccount));
+        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(insurancePayment);
+        when(insurancePayment.getStatus()).thenReturn("paid");
+
+        // Act
+        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(token, 1L, requestBody);
+
+        // Assert
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(responseEntity.getBody())
+                .isInstanceOf(CustomErrorResponse.class)
+                .extracting("statusCode", "errorKey", "message")
+                .containsExactly(HttpStatus.BAD_REQUEST.value(),"PaymentAlreadyPaid","The insurance payment has already been paid");
+    }
+
+    @Test
+    void payInsurancePayment_InternalErrorWhenUpdating_ShouldReturnInternalServerErrorResponse() {
+        // Arrange
+        String token = "Bearer validToken";
+        String method = "credit card";
+        InsurancePayment insurancePayment = mock(InsurancePayment.class);
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("method", method);
+
+        String email = "test@example.com";
+        UserAccount userAccount = mock(UserAccount.class);
+
+        when(jwtService.extractUsername(token.substring(7))).thenReturn(email);
+        when(userAccountService.getUserByEmail(email)).thenReturn(Optional.of(userAccount));
+        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(insurancePayment);
+        when(insurancePayment.getStatus()).thenReturn("unpaid");
+        when(insurancePaymentService.updateInsurancePayment(insurancePayment)).thenReturn(false);
+
+        // Act
+        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(token, 1L, requestBody);
+
+        /// Assert
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(responseEntity.getBody())
+                .isInstanceOf(CustomErrorResponse.class)
+                .extracting("statusCode", "errorKey", "message")
+                .containsExactly(HttpStatus.INTERNAL_SERVER_ERROR.value(),"InternalServerError","Could not update the insurance payment");
+
+    }
+
+    @Test
+    void payInsurancePayment_WhenUserDoesNotExist_ShouldReturnNotFoundResponse() {
+        // Arrange
+        String token = "Bearer validToken";
+        String method = "credit card";
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("method", method);
+
+        String email = "test@example.com";
+
+        when(jwtService.extractUsername(token.substring(7))).thenReturn(email);
+        when(userAccountService.getUserByEmail(email)).thenReturn(Optional.empty());
+
+        // Act
+        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(token, 1L, requestBody);
+
+        /// Assert
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(responseEntity.getBody())
+                .isInstanceOf(CustomErrorResponse.class)
+                .extracting("statusCode", "errorKey", "message")
+                .containsExactly(HttpStatus.NOT_FOUND.value(),"EmailNotFound","Could not find the user corresponding to the email");
+
+    }
 }

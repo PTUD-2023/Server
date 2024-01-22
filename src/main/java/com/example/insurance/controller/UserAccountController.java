@@ -57,7 +57,7 @@ public class UserAccountController {
     {
         if(userAccountService.updateUserInforByEmail(userAccountDTO))
         {
-            return ResponseEntity.status(HttpStatus.OK).body(new CustomSuccessResponse("UpdateSuccess","Update user information successfully"));
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomSuccessResponse("Update user information successfully","UpdateSuccess"));
         }
         else{
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CustomErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),"UpdateFailed","Update user information failed",new Date()));
@@ -79,7 +79,7 @@ public class UserAccountController {
                 {
                     if(userAccountService.updatePasswordByEmail(email,newPassword))
                     {
-                        return ResponseEntity.status(HttpStatus.OK).body(new CustomSuccessResponse("UpdateSuccess","Update user password successfully"));
+                        return ResponseEntity.status(HttpStatus.OK).body(new CustomSuccessResponse("Update user password successfully","UpdateSuccess"));
                     }
                     else{
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CustomErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),"UpdateFailed","Update user password failed",new Date()));

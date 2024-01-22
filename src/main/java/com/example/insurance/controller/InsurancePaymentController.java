@@ -82,7 +82,7 @@ public class InsurancePaymentController {
             if (insurancePaymentService.updateInsurancePayment(insurancePayment))
             {
                 insuranceContractService.createInsuranceContract(insurancePayment.getRegistrationForm());
-                return ResponseEntity.ok(new CustomSuccessResponse("PaymentSuccess","Payment successfully"));
+                return ResponseEntity.ok(new CustomSuccessResponse("Payment successfully","PaymentSuccess"));
             }
             else
             {
