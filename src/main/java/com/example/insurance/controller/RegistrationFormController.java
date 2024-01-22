@@ -82,7 +82,7 @@ public class RegistrationFormController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<?> getRegistrationFormByUserAccountId(@PathVariable Long id) {
+    public ResponseEntity<?> getRegistrationFormById(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(registrationFormService.getRegistrationFormById(id));
     }
 
@@ -139,7 +139,7 @@ public class RegistrationFormController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(HttpStatus.BAD_REQUEST.value(),"CannotRefuse","Cannot refuse registration form",new Date()));
     }
 
-    private void sendResponseEmail(RegistrationForm registrationForm,String subject,String content)
+    public void sendResponseEmail(RegistrationForm registrationForm,String subject,String content)
     {
         String to = registrationForm.getInsuredPerson().getEmail();
         StringBuilder body = new StringBuilder();
