@@ -87,7 +87,8 @@ public class RegistrationFormController {
     }
 
     @GetMapping("/get-by-user")
-    public ResponseEntity<?> getRegistrationFormByUser(@RequestHeader(name = "Authorization") String token) {
+    public ResponseEntity<?> getRegistrationFormByUser(@RequestHeader(name = "Authorization") String token,@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10")  int size) {
+        Pageable pageable = PageRequest.of(page,size, Sort.by("createdAt").descending());
         if (token != null && token.startsWith("Bearer ")) {
             String jwtToken = token.substring(7);
             String email = jwtService.extractUsername(jwtToken);
@@ -95,7 +96,7 @@ public class RegistrationFormController {
             if(userAccount.isPresent())
             {
                 Long userAccountId = userAccount.get().getId();
-                return ResponseEntity.status(HttpStatus.OK).body(registrationFormService.getRegistrationFormByUserAccountId(userAccountId));
+                return ResponseEntity.status(HttpStatus.OK).body(registrationFormService.getRegistrationFormByUserAccountId(userAccountId,pageable));
             }
             else{
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomErrorResponse(HttpStatus.NOT_FOUND.value(),"EmailNotFound","Could not find the user corresponding to the email",new Date()));

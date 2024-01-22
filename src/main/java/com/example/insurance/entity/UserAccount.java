@@ -35,7 +35,7 @@ public class UserAccount {
     @Column(name = "avatar",columnDefinition = "json")
     private String avatar;
     @Column(name = "CMND")
-    private String CMND;
+    private String cmnd;
     @Column(name = "address")
     private String address;
     @Column(name = "status")

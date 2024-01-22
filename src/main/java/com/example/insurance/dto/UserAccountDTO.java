@@ -17,7 +17,7 @@ public class UserAccountDTO {
     private Date birthday;
     private String gender;
     private String avatar;
-    private String CMND;
+    private String cmnd;
     private String address;
     private Date timeCreated;
     private String role;

@@ -26,10 +26,6 @@ public class InsuranceContract {
     @JoinColumn(name = "registration_form_id", referencedColumnName = "id")
     private RegistrationForm registrationForm;
 
-    @Column(name = "payment_status")
-    private String paymentStatus;
-    @Column(name = "payment_type")
-    private String paymentType;
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;

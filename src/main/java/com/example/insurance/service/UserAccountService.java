@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -84,6 +86,38 @@ public class UserAccountService implements UserDetailsService {
         calendar.add(Calendar.DAY_OF_MONTH, -2);
         Date cutoffDate = calendar.getTime();
         userAccountRepository.deleteUserAccountsByStatusAndTimeCreatedBefore("not_activated",cutoffDate);
+    }
+
+    public boolean updateUserInforByEmail(UserAccountDTO userAccountDTO) {
+        UserAccount userAccount = userAccountRepository.findByEmail(userAccountDTO.getEmail()).orElse(null);
+        if(userAccount != null)
+        {
+            userAccount.setFirstName(userAccountDTO.getFirstName());
+            userAccount.setLastName(userAccountDTO.getLastName());
+            userAccount.setPhone(userAccountDTO.getPhone());
+            userAccount.setBirthday(userAccountDTO.getBirthday());
+            userAccount.setGender(userAccountDTO.getGender());
+            userAccount.setCmnd(userAccountDTO.getCmnd());
+            userAccount.setAddress(userAccountDTO.getAddress());
+            userAccountRepository.save(userAccount);
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public boolean updatePasswordByEmail(String email,String newPassword) {
+        UserAccount userAccount = userAccountRepository.findByEmail(email).orElse(null);
+        if(userAccount != null)
+        {
+            userAccount.setPassword(passwordEncoder.encode(newPassword));
+            userAccountRepository.save(userAccount);
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     @Scheduled( initialDelay = 1000*60*30,fixedRate = 1000*60*60*2)

@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
 
 @Service
 public class RegistrationFormService {
@@ -32,8 +31,8 @@ public class RegistrationFormService {
         registrationFormRepository.save(registrationForm);
     }
 
-    public List<RegistrationForm> getRegistrationFormByUserAccountId(Long userAccountId) {
-        return registrationFormRepository.findByUserAccountId(userAccountId);
+    public Page<RegistrationForm> getRegistrationFormByUserAccountId(Long userAccountId,Pageable pageable) {
+        return registrationFormRepository.findByUserAccountId(userAccountId,pageable);
     }
 
 

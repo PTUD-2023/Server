@@ -6,12 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 
 @Repository
 public interface RegistrationFormRepository extends CrudRepository<RegistrationForm, Long> {
 
-    List<RegistrationForm> findByUserAccountId(Long id);
+    Page<RegistrationForm> findByUserAccountId(Long id,Pageable pageable);
     Page<RegistrationForm> findAll(Pageable pageable);
 
 }

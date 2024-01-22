@@ -1,29 +1,33 @@
 package com.example.insurance.controller;
 
 import com.example.insurance.common.CustomErrorResponse;
+import com.example.insurance.common.CustomSuccessResponse;
 import com.example.insurance.dto.UserAccountDTO;
 import com.example.insurance.service.JwtService;
 import com.example.insurance.service.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/user")
 public class UserAccountController {
     private final UserAccountService userAccountService;
     private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
     @Autowired
-    public UserAccountController(UserAccountService userAccountService, JwtService jwtService) {
+    public UserAccountController(UserAccountService userAccountService, JwtService jwtService, AuthenticationManager authenticationManager) {
         this.userAccountService = userAccountService;
         this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
     }
 
     @GetMapping("/infor")
@@ -46,5 +50,46 @@ public class UserAccountController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateUserInfor( @RequestBody UserAccountDTO userAccountDTO)
+    {
+        if(userAccountService.updateUserInforByEmail(userAccountDTO))
+        {
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomSuccessResponse("UpdateSuccess","Update user information successfully"));
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CustomErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),"UpdateFailed","Update user information failed",new Date()));
+        }
+    }
+
+    @PatchMapping("/update-password")
+    public ResponseEntity<?> updateUserPassword(@RequestHeader(name = "Authorization") String token, @RequestBody Map<String, Object> requestBodyMap)
+    {
+        String oldPassword = (String) requestBodyMap.get("oldPassword");
+        String newPassword = (String) requestBodyMap.get("newPassword");
+
+        if (token != null && token.startsWith("Bearer ")) {
+            String jwtToken = token.substring(7);
+            String email = jwtService.extractUsername(jwtToken);
+            try {
+                Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, oldPassword));
+                if(authentication.isAuthenticated())
+                {
+                    if(userAccountService.updatePasswordByEmail(email,newPassword))
+                    {
+                        return ResponseEntity.status(HttpStatus.OK).body(new CustomSuccessResponse("UpdateSuccess","Update user password successfully"));
+                    }
+                    else{
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CustomErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),"UpdateFailed","Update user password failed",new Date()));
+                    }
+                }
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(HttpStatus.BAD_REQUEST.value(),"WrongPassword","Wrong password",new Date()));
+            }
+
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
 }

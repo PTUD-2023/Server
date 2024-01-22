@@ -26,6 +26,9 @@ public class InsurancePayment {
     @Column(name = "payment_method")
     private String paymentMethod;
 
+    @Column(name = "implementer")
+    private Long implementer;
+
     @Column(name = "status")
     private String status;
 
