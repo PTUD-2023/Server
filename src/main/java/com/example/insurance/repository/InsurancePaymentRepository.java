@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface InsurancePaymentRepository extends CrudRepository<InsurancePayment,Long> {
     Page<InsurancePayment> findInsurancePaymentByRegistrationFormUserAccountId(Long userAccountId, Pageable pageable);
+    Page<InsurancePayment> findAll(Pageable pageable);
 }

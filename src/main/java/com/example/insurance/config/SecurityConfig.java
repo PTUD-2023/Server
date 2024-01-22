@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/v1/insurance-plan/**").permitAll()
                         .requestMatchers("/v1/insurance-price/**").permitAll()
                         .requestMatchers("/v1/registration-form/get-all").hasRole("ADMIN")
+                        .requestMatchers("/v1/insurance-payment/get-all").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

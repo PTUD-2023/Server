@@ -39,7 +39,7 @@ public class InsurancePlanController {
             return ResponseEntity.status(HttpStatus.OK).body(insurancePlanDTO);
         }
         else{
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomErrorResponse(HttpStatus.NOT_FOUND.value(),"EmailNotFound","Could not find the user corresponding to the email",new Date()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(HttpStatus.NOT_FOUND.value(), "PlanNotFound", "Cannot find insurance plan with id: " + id,new Date()));
         }
     }
 }

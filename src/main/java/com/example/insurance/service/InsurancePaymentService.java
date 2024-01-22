@@ -54,4 +54,8 @@ public class InsurancePaymentService {
     public InsurancePayment getInsurancePaymentById(Long id) {
         return insurancePaymentRepository.findById(id).orElse(null);
     }
+
+    public Page<InsurancePayment> getAllInsurancePayment(Pageable pageable) {
+        return insurancePaymentRepository.findAll(pageable);
+    }
 }

@@ -98,4 +98,10 @@ public class InsurancePaymentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomErrorResponse(HttpStatus.NOT_FOUND.value(),"InsurancePaymentNotFound","Could not find the insurance payment corresponding to the id",new Date()));
         }
     }
+
+    @GetMapping("/get-all")
+    public ResponseEntity<?> getAllInsurancePayment(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10")  int size) {
+        Pageable pageable = PageRequest.of(page,size, Sort.by("createdAt").descending());
+        return ResponseEntity.ok(insurancePaymentService.getAllInsurancePayment(pageable));
+    }
 }
