@@ -81,12 +81,8 @@ public class InsurancePaymentController {
             insurancePayment.setImplementer(userAccountId);
             if (insurancePaymentService.updateInsurancePayment(insurancePayment))
             {
-<<<<<<< HEAD
                 insuranceContractService.createInsuranceContract(insurancePayment.getRegistrationForm());
                 return ResponseEntity.ok(new CustomSuccessResponse("PaymentSuccess","Payment successfully"));
-=======
-                return ResponseEntity.ok(new CustomSuccessResponse("Payment successfully","PaymentSuccess"));
->>>>>>> e633b1525b6bed28c8e20ce54c38a2f8f765e1b3
             }
             else
             {

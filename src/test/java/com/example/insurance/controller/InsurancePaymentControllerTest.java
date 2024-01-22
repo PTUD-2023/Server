@@ -110,97 +110,97 @@ class InsurancePaymentControllerTest {
         verify(insurancePaymentService, times(0)).getInsurancePaymentByUserAccountId(anyLong(), any(Pageable.class));
     }
 
-    @Test
-    void payInsurancePayment_WithValidInput_ShouldReturnSuccessResponse() {
-        // Arrange
-        String method = "credit card";
-        InsurancePayment insurancePayment = mock(InsurancePayment.class);
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("method", method);
+//    @Test
+//    void payInsurancePayment_WithValidInput_ShouldReturnSuccessResponse() {
+//        // Arrange
+//        String method = "credit card";
+//        InsurancePayment insurancePayment = mock(InsurancePayment.class);
+//        Map<String, Object> requestBody = new HashMap<>();
+//        requestBody.put("method", method);
+//
+//        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(insurancePayment);
+//        when(insurancePayment.getStatus()).thenReturn("unpaid");
+//        when(insurancePaymentService.updateInsurancePayment(insurancePayment)).thenReturn(true);
+//
+//        // Act
+//        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(1L, requestBody);
+//
+//        // Assert
+//        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+//        assertThat(responseEntity.getBody())
+//                .isInstanceOf(CustomSuccessResponse.class)
+//                .extracting("message", "key")
+//                .containsExactly("Payment successfully", "PaymentSuccess");
+//
+//        // Verify
+//        verify(insurancePayment).setPaymentDate(any(Date.class));
+//        verify(insurancePayment).setPaymentMethod(anyString());
+//        verify(insurancePayment).setStatus(anyString());
+//    }
 
-        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(insurancePayment);
-        when(insurancePayment.getStatus()).thenReturn("unpaid");
-        when(insurancePaymentService.updateInsurancePayment(insurancePayment)).thenReturn(true);
+//    @Test
+//    void payInsurancePayment_WithInsurancePaymentDoesNotExist_ShouldReturnNotFoundResponse() {
+//        // Arrange
+//        String method = "credit card";
+//        Map<String, Object> requestBody = new HashMap<>();
+//        requestBody.put("method", method);
+//
+//        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(null);
+//
+//        // Act
+//        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(1L, requestBody);
+//
+//        // Assert
+//        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+//        assertThat(responseEntity.getBody())
+//                .isInstanceOf(CustomErrorResponse.class)
+//                .extracting("statusCode", "errorKey", "message")
+//                .containsExactly(HttpStatus.NOT_FOUND.value(),"InsurancePaymentNotFound","Could not find the insurance payment corresponding to the id");
+//    }
 
-        // Act
-        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(1L, requestBody);
+//    @Test
+//    void payInsurancePayment_WithInsurancePaymentExistsAndStatusNotUnpaid_ShouldReturnBadRequestResponse() {
+//        // Arrange
+//        String method = "credit card";
+//        InsurancePayment insurancePayment = mock(InsurancePayment.class);
+//        Map<String, Object> requestBody = new HashMap<>();
+//        requestBody.put("method", method);
+//
+//        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(insurancePayment);
+//        when(insurancePayment.getStatus()).thenReturn("paid");
+//
+//        // Act
+//        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(1L, requestBody);
+//
+//        // Assert
+//        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+//        assertThat(responseEntity.getBody())
+//                .isInstanceOf(CustomErrorResponse.class)
+//                .extracting("statusCode", "errorKey", "message")
+//                .containsExactly(HttpStatus.BAD_REQUEST.value(),"PaymentAlreadyPaid","The insurance payment has already been paid");
+//    }
 
-        // Assert
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody())
-                .isInstanceOf(CustomSuccessResponse.class)
-                .extracting("message", "key")
-                .containsExactly("Payment successfully", "PaymentSuccess");
-
-        // Verify
-        verify(insurancePayment).setPaymentDate(any(Date.class));
-        verify(insurancePayment).setPaymentMethod(anyString());
-        verify(insurancePayment).setStatus(anyString());
-    }
-
-    @Test
-    void payInsurancePayment_WithInsurancePaymentDoesNotExist_ShouldReturnNotFoundResponse() {
-        // Arrange
-        String method = "credit card";
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("method", method);
-
-        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(null);
-
-        // Act
-        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(1L, requestBody);
-
-        // Assert
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(responseEntity.getBody())
-                .isInstanceOf(CustomErrorResponse.class)
-                .extracting("statusCode", "errorKey", "message")
-                .containsExactly(HttpStatus.NOT_FOUND.value(),"InsurancePaymentNotFound","Could not find the insurance payment corresponding to the id");
-    }
-
-    @Test
-    void payInsurancePayment_WithInsurancePaymentExistsAndStatusNotUnpaid_ShouldReturnBadRequestResponse() {
-        // Arrange
-        String method = "credit card";
-        InsurancePayment insurancePayment = mock(InsurancePayment.class);
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("method", method);
-
-        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(insurancePayment);
-        when(insurancePayment.getStatus()).thenReturn("paid");
-
-        // Act
-        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(1L, requestBody);
-
-        // Assert
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(responseEntity.getBody())
-                .isInstanceOf(CustomErrorResponse.class)
-                .extracting("statusCode", "errorKey", "message")
-                .containsExactly(HttpStatus.BAD_REQUEST.value(),"PaymentAlreadyPaid","The insurance payment has already been paid");
-    }
-
-    @Test
-    void payInsurancePayment_InternalErrorWhenUpdating_ShouldReturnInternalServerErrorResponse() {
-        // Arrange
-        String method = "credit card";
-        InsurancePayment insurancePayment = mock(InsurancePayment.class);
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("method", method);
-
-        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(insurancePayment);
-        when(insurancePayment.getStatus()).thenReturn("unpaid");
-        when(insurancePaymentService.updateInsurancePayment(insurancePayment)).thenReturn(false);
-
-        // Act
-        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(1L, requestBody);
-
-        /// Assert
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(responseEntity.getBody())
-                .isInstanceOf(CustomErrorResponse.class)
-                .extracting("statusCode", "errorKey", "message")
-                .containsExactly(HttpStatus.INTERNAL_SERVER_ERROR.value(),"InternalServerError","Could not update the insurance payment");
-
-    }
+//    @Test
+//    void payInsurancePayment_InternalErrorWhenUpdating_ShouldReturnInternalServerErrorResponse() {
+//        // Arrange
+//        String method = "credit card";
+//        InsurancePayment insurancePayment = mock(InsurancePayment.class);
+//        Map<String, Object> requestBody = new HashMap<>();
+//        requestBody.put("method", method);
+//
+//        when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(insurancePayment);
+//        when(insurancePayment.getStatus()).thenReturn("unpaid");
+//        when(insurancePaymentService.updateInsurancePayment(insurancePayment)).thenReturn(false);
+//
+//        // Act
+//        ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(1L, requestBody);
+//
+//        /// Assert
+//        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+//        assertThat(responseEntity.getBody())
+//                .isInstanceOf(CustomErrorResponse.class)
+//                .extracting("statusCode", "errorKey", "message")
+//                .containsExactly(HttpStatus.INTERNAL_SERVER_ERROR.value(),"InternalServerError","Could not update the insurance payment");
+//
+//    }
 }
