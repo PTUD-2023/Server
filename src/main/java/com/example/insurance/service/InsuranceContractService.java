@@ -4,6 +4,8 @@ import com.example.insurance.entity.InsuranceContract;
 import com.example.insurance.entity.RegistrationForm;
 import com.example.insurance.repository.InsuranceContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -29,5 +31,13 @@ public class InsuranceContractService {
         insuranceContract.setStartDate(startDate);
         insuranceContract.setEndDate(endDate);
         insuranceContractRepository.save(insuranceContract);
+    }
+
+    public Page<InsuranceContract> getAllInsuranceContracts(Pageable pageable) {
+        return insuranceContractRepository.findAll(pageable);
+    }
+
+    public Page<InsuranceContract> getInsuranceContractsByUserAccountId(Long userAccountId, Pageable pageable) {
+        return insuranceContractRepository.findInsuranceContractByRegistrationFormUserAccountId(userAccountId,pageable);
     }
 }
