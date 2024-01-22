@@ -5,6 +5,7 @@ import com.example.insurance.common.CustomSuccessResponse;
 import com.example.insurance.dto.NewRegistrationForm;
 import com.example.insurance.entity.*;
 import com.example.insurance.service.*;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -28,32 +29,31 @@ import static org.mockito.Mockito.*;
 class RegistrationFormControllerTest {
     @Mock
     private RegistrationFormService registrationFormService;
-
     @Mock
     private InsuredPersonService insuredPersonService;
-
     @Mock
     private HealthInformationService healthInformationService;
-
     @Mock
     private InsuranceInformationService insuranceInformationService;
-
     @Mock
     private UserAccountService userAccountService;
-
+    @Mock
+    private InsurancePaymentService insurancePaymentService;
     @Mock
     private JwtService jwtService;
+    @Mock
+    private MyEmailService myEmailService;
 
     @InjectMocks
     private RegistrationFormController registrationFormController;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void testCreateRegistrationForm_WithValidInput() {
+    public void createRegistrationForm_WithValidInput_ShouldReturnCreatedResponse() {
         // Arrange
         String token = "Bearer mockToken"; //Token == null and token start with Bearer
         NewRegistrationForm newRegistrationForm = mock(NewRegistrationForm.class);
@@ -101,7 +101,7 @@ class RegistrationFormControllerTest {
     }
 
     @Test
-    public void testCreateRegistrationForm_WithInvalidToken() {
+    public void createRegistrationForm_WithInvalidToken_ShouldReturnUnauthorizedResponse() {
         // Arrange
         String invalidToken = "InvalidToken";
         NewRegistrationForm newRegistrationForm = mock(NewRegistrationForm.class);
@@ -115,7 +115,7 @@ class RegistrationFormControllerTest {
     }
 
     @Test
-    public void testCreateRegistrationForm_WithMissingUser() {
+    public void createRegistrationForm_WhenUserDoesNotExist_ShouldReturnNotFoundResponse() {
         // Arrange
         String validToken = "Bearer mockToken";
         NewRegistrationForm newRegistrationForm = mock(NewRegistrationForm.class);
@@ -135,7 +135,7 @@ class RegistrationFormControllerTest {
     }
 
     @Test
-    public void testCreateRegistrationForm_WithInvalidHealthInformation() {
+    public void createRegistrationForm_WithInvalidHealthInformation_ShouldReturnBadRequestResponse() {
         // Arrange
         String validToken = "Bearer mockToken";
         NewRegistrationForm newRegistrationForm = mock(NewRegistrationForm.class);
@@ -169,7 +169,7 @@ class RegistrationFormControllerTest {
     }
 
     @Test
-    public void testCreateRegistrationForm_WithInvalidInsuranceInformation() {
+    public void createRegistrationForm_WithInvalidInsuranceInformation_ShouldReturnBadRequestResponse() {
         // Arrange
         String validToken = "Bearer mockToken";
         NewRegistrationForm newRegistrationForm = mock(NewRegistrationForm.class);
@@ -203,7 +203,7 @@ class RegistrationFormControllerTest {
     }
 
     @Test
-    public void testCreateRegistrationForm_WithInvalidInsuredPerson() {
+    public void createRegistrationForm_WithInvalidInsuredPerson_ShouldReturnBadRequestResponse() {
         // Arrange
         String validToken = "Bearer mockToken";
         NewRegistrationForm newRegistrationForm = mock(NewRegistrationForm.class);
@@ -237,25 +237,25 @@ class RegistrationFormControllerTest {
     }
 
     @Test
-    public void testGetRegistrationFormByUserAccountId() {
+    public void getRegistrationFormById_ShouldReturnRegistrationForm() {
         // Arrange
         Long userId = 123L;
-        RegistrationForm mockRegistrationForm = new RegistrationForm(); // Replace with your actual class
+        RegistrationForm mockRegistrationForm = new RegistrationForm();
         when(registrationFormService.getRegistrationFormById(userId)).thenReturn(mockRegistrationForm);
 
         // Act
-        ResponseEntity<?> responseEntity = registrationFormController.getRegistrationFormByUserAccountId(userId);
+        ResponseEntity<?> responseEntity = registrationFormController.getRegistrationFormById(userId);
 
         // Assert
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isEqualTo(mockRegistrationForm); // Use appropriate assertions
+        assertThat(responseEntity.getBody()).isEqualTo(mockRegistrationForm);
 
         // Verify that the service method was called with the correct argument
         verify(registrationFormService, times(1)).getRegistrationFormById(userId);
     }
 
     @Test
-    void testGetRegistrationFormByUser_WithInvalidToken() {
+    public void getRegistrationFormByUser_WhenInvalidToken_ShouldReturnUnauthorizedResponse() {
         // Arrange
         String invalidToken = "InvalidToken";
 
@@ -268,7 +268,7 @@ class RegistrationFormControllerTest {
     }
 
     @Test
-    void testGetRegistrationFormByUser_WithMissingUser() {
+    public void getRegistrationFormByUser_WhenUserDoesNotExist_ShouldReturnNotFoundResponse() {
         // Arrange
         String validToken = "Bearer mockToken";
 
@@ -288,7 +288,7 @@ class RegistrationFormControllerTest {
     }
 
     @Test
-    void testGetRegistrationFormByUser_WithValidInput() {
+    public void getRegistrationFormByUser_WithValidInput_ShouldReturnSuccessResponse() {
         // Arrange
         String token = "Bearer mockToken";
 
@@ -310,7 +310,7 @@ class RegistrationFormControllerTest {
     }
 
     @Test
-    public void testGetAllRegistrationForm() {
+    public void getAllRegistrationForm_ShouldReturnRegistrationForms() {
         // Arrange
         int page = 0;
         int size = 10;
@@ -327,7 +327,114 @@ class RegistrationFormControllerTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo(mockPage);
 
-        // Verify that the service method was called with the correct argument
+        // Verify
         verify(registrationFormService, times(1)).getAllRegistrationForm(any(Pageable.class));
+    }
+
+    @Test
+    public void approveRegistrationForm_WhenRegistrationFormExists_ShouldReturnSuccessResponse() {
+        //Arrange
+        RegistrationFormController mockRegistrationFormController = mock(RegistrationFormController.class);
+        Long id = 1L;
+        RegistrationForm mockRegistrationForm = mock(RegistrationForm.class);
+
+        when(registrationFormService.updateStatusRegistrationForm(id,"approved")).thenReturn(mockRegistrationForm);
+
+        when(mockRegistrationForm.getInsuredPerson()).thenReturn(mock(InsuredPerson.class));
+        when(mockRegistrationForm.getInsuredPerson().getName()).thenReturn("name");
+
+        mockRegistrationFormController.sendResponseEmail(mockRegistrationForm, "subject", "content");
+        verify(mockRegistrationFormController).sendResponseEmail(mockRegistrationForm, "subject", "content");
+
+        insurancePaymentService.createInsurancePayment(mockRegistrationForm);
+        verify(insurancePaymentService).createInsurancePayment(mockRegistrationForm);
+
+        //Act
+        ResponseEntity<?> responseEntity = registrationFormController.approveRegistrationForm(id);
+
+        // Assert
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody())
+                .isInstanceOf(CustomSuccessResponse.class)
+                .extracting("message", "key")
+                .containsExactly("Approved registration form successfully", "Approved");
+    }
+
+    @Test
+    public void approveRegistrationForm_WhenRegistrationFormDoesNotExist_ShouldReturnBadRequestResponse() {
+        //Arrange
+        Long id = 1L;
+        when(registrationFormService.updateStatusRegistrationForm(id,"approved")).thenReturn(null);
+
+        //Act
+        ResponseEntity<?> responseEntity = registrationFormController.approveRegistrationForm(id);
+
+        // Assert
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(responseEntity.getBody())
+                .isInstanceOf(CustomErrorResponse.class)
+                .extracting("statusCode", "errorKey", "message")
+                .containsExactly(HttpStatus.BAD_REQUEST.value(),"CannotApproved","Cannot approve registration form");
+    }
+
+    @Test
+    public void refuseRegistrationForm_WhenRegistrationFormExists_ShouldReturnSuccessResponse() {
+        //Arrange
+        RegistrationFormController mockRegistrationFormController = mock(RegistrationFormController.class);
+        Long id = 1L;
+        RegistrationForm mockRegistrationForm = mock(RegistrationForm.class);
+
+        when(registrationFormService.updateStatusRegistrationForm(id,"refused")).thenReturn(mockRegistrationForm);
+
+        when(mockRegistrationForm.getInsuredPerson()).thenReturn(mock(InsuredPerson.class));
+        when(mockRegistrationForm.getInsuredPerson().getName()).thenReturn("name");
+
+        mockRegistrationFormController.sendResponseEmail(mockRegistrationForm, "subject", "content");
+        verify(mockRegistrationFormController).sendResponseEmail(mockRegistrationForm, "subject", "content");
+
+        //Act
+        ResponseEntity<?> responseEntity = registrationFormController.refuseRegistrationForm(id);
+
+        // Assert
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody())
+                .isInstanceOf(CustomSuccessResponse.class)
+                .extracting("message", "key")
+                .containsExactly("Refuse registration form successfully", "Refused");
+    }
+
+    @Test
+    public void refuseRegistrationForm_WhenRegistrationFormDoesNotExist_ShouldReturnBadRequestResponse() {
+        //Arrange
+        Long id = 1L;
+        when(registrationFormService.updateStatusRegistrationForm(id,"refused")).thenReturn(null);
+
+        //Act
+        ResponseEntity<?> responseEntity = registrationFormController.refuseRegistrationForm(id);
+
+        // Assert
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(responseEntity.getBody())
+                .isInstanceOf(CustomErrorResponse.class)
+                .extracting("statusCode", "errorKey", "message")
+                .containsExactly(HttpStatus.BAD_REQUEST.value(),"CannotRefuse","Cannot refuse registration form");
+    }
+
+    @Test
+    void sendResponseEmail_ShouldHandleException() throws MessagingException {
+        // Arrange
+        RegistrationForm mockRegistrationForm = mock(RegistrationForm.class);
+
+        when(mockRegistrationForm.getInsuredPerson()).thenReturn(mock(InsuredPerson.class));
+        when(mockRegistrationForm.getInsuredPerson().getEmail()).thenReturn("mockEmail");
+        when(mockRegistrationForm.getInsuredPerson().getName()).thenReturn("name");
+
+        doThrow(new RuntimeException("Error sending email")).when(myEmailService).sendSimpleMessage(anyString(), anyString(), anyString());
+
+        // Act
+        registrationFormController.sendResponseEmail(mockRegistrationForm, "", "");
+
+        // Assert
+        // Verify that the exception is printed to the console
     }
 }

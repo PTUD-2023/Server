@@ -66,7 +66,7 @@ public class InsurancePaymentController {
             insurancePayment.setStatus("paid");
             if (insurancePaymentService.updateInsurancePayment(insurancePayment))
             {
-                return ResponseEntity.ok(new CustomSuccessResponse("PaymentSuccess","Payment successfully"));
+                return ResponseEntity.ok(new CustomSuccessResponse("Payment successfully","PaymentSuccess"));
             }
             else
             {

@@ -2,10 +2,8 @@ package com.example.insurance.controller;
 
 import com.example.insurance.common.CustomErrorResponse;
 import com.example.insurance.dto.UserAccountDTO;
-import com.example.insurance.entity.UserAccount;
 import com.example.insurance.service.JwtService;
 import com.example.insurance.service.UserAccountService;
-import org.eclipse.angus.mail.imap.protocol.UIDSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -14,10 +12,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
