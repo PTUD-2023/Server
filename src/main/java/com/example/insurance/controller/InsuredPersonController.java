@@ -1,11 +1,10 @@
 package com.example.insurance.controller;
 
+import com.example.insurance.dto.NewInsuredPerson;
 import com.example.insurance.entity.HealthInformation;
 import com.example.insurance.entity.InsuredPerson;
 import com.example.insurance.service.HealthInformationService;
 import com.example.insurance.service.InsuredPersonService;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +23,9 @@ public class InsuredPersonController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createInsuredPerson(@RequestBody Test test) {
-        InsuredPerson insuredPerson = test.getInsuredPerson();
-        HealthInformation healthInformation = test.getHealthInformation();
+    public ResponseEntity<?> createInsuredPerson(@RequestBody NewInsuredPerson newInsuredPerson) {
+        InsuredPerson insuredPerson = newInsuredPerson.getInsuredPerson();
+        HealthInformation healthInformation = newInsuredPerson.getHealthInformation();
 
         HealthInformation newHealthInformation = healthInformationService.createHealthInformation(healthInformation);
         if(newHealthInformation.getId() > 0) {
@@ -54,10 +53,5 @@ public class InsuredPersonController {
         }
     }
 
-    @Getter
-    @Setter
-    private static class Test {
-        private InsuredPerson insuredPerson;
-        private HealthInformation healthInformation;
-    }
+
 }
