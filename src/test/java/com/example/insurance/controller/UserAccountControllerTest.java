@@ -33,7 +33,7 @@ class UserAccountControllerTest {
     }
 
     @Test
-    void testGetUserInfor_WithValidInput() {
+    void testGetUserInfor_WithValidInput_ShouldReturnUser() {
         //Arrange
         String token = "Bearer mockToken";
         when(jwtService.extractUsername(anyString())).thenReturn("mockEmail");
@@ -50,7 +50,7 @@ class UserAccountControllerTest {
     }
 
     @Test
-    void testGetUserInfor_WithInValidToken() {
+    void testGetUserInfor_WithInvalidToken_ShouldReturnUnauthorizedResponse() {
         //Arrange
         String invalidToken = "InvalidToken";
 
@@ -63,7 +63,7 @@ class UserAccountControllerTest {
     }
 
     @Test
-    void testGetUserInfor_WithNotExistsUser() {
+    void testGetUserInfor_WhenUserDoesNotExist_ShouldReturnNotFoundResponse() {
         //Arrange
         String validToken = "Bearer mockToken";
 

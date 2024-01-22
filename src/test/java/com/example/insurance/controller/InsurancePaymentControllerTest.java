@@ -3,7 +3,6 @@ package com.example.insurance.controller;
 import com.example.insurance.common.CustomErrorResponse;
 import com.example.insurance.common.CustomSuccessResponse;
 import com.example.insurance.entity.InsurancePayment;
-import com.example.insurance.entity.RegistrationForm;
 import com.example.insurance.entity.UserAccount;
 import com.example.insurance.service.InsurancePaymentService;
 import com.example.insurance.service.JwtService;
@@ -15,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,12 +21,9 @@ import org.springframework.http.ResponseEntity;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 class InsurancePaymentControllerTest {
     @Mock
@@ -74,9 +69,6 @@ class InsurancePaymentControllerTest {
         // Arrange
         String token = "Bearer validToken";
         String email = "test@example.com";
-        UserAccount userAccount = mock(UserAccount.class);
-        List<InsurancePayment> mockInsurancePayments = Collections.singletonList(new InsurancePayment());
-        Page<InsurancePayment> mockPage = new PageImpl<>(mockInsurancePayments);
 
         when(jwtService.extractUsername(token.substring(7))).thenReturn(email);
         when(userAccountService.getUserByEmail(email)).thenReturn(Optional.empty());

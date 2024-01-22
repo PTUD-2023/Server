@@ -71,7 +71,7 @@ public class AuthController {
     {
         if(signUpRequest.getEmail().isEmpty() || signUpRequest.getPassword().isEmpty())
         {
-            throw new CustomException(HttpStatus.BAD_REQUEST.value(),"LackOfEmailOrPassword","Missing Email or password");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(HttpStatus.BAD_REQUEST.value(), "LackOfEmailOrPassword","Missing Email or password",new Date()));
         }
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signUpRequest.getEmail(), signUpRequest.getPassword()));
         Object principal = authentication.getPrincipal();
@@ -81,9 +81,9 @@ public class AuthController {
         }
         else if (authentication.isAuthenticated()) {
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(signUpRequest.getEmail());
-            return ResponseEntity.status(HttpStatus.OK).body(new SignUpResponse(jwtService.generateToken(signUpRequest.getEmail()),refreshToken.getToken(),"Success","Login is successfully")) ;
+            return ResponseEntity.status(HttpStatus.OK).body(new SignUpResponse(jwtService.generateToken(signUpRequest.getEmail()),refreshToken.getToken(),"Login is successfully","Success")) ;
         } else {
-            throw new UsernameNotFoundException("invalid user with email = " + signUpRequest.getEmail() + " request !");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomErrorResponse(HttpStatus.NOT_FOUND.value(),"EmailNotFound","Could not find the user corresponding to the email",new Date()));
         }
     }
 
@@ -104,14 +104,14 @@ public class AuthController {
 
     }
 
-    private void sendConfirmCodeEmail(UserAccount userAccount)
+    public void sendConfirmCodeEmail(UserAccount userAccount)
     {
         ConfirmCode confirmCode=  confirmCodeService.createConfirmCode(userAccount.getEmail());
         String confirmationUrl =env.getProperty("client.URL")
                 +"/confirm/"+ Base64Encoding.encodeStringToBase64(userAccount.getEmail());
 
         String to = userAccount.getEmail();
-        String subject =confirmCode.getCode()+ " là mã xác nhận của bạn";
+        String subject = confirmCode.getCode() + " là mã xác nhận của bạn";
         StringBuilder body = new StringBuilder();
         Resource resource = new ClassPathResource("static/emailTemplate.html");
         String htmlContent = ReadEmailTemplate.read(resource);
