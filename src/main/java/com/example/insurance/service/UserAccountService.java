@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -46,7 +44,9 @@ public class UserAccountService implements UserDetailsService {
         return userAccountRepository.findByEmail(email);
     }
 
-
+    public Optional<UserAccount> getUserById(Long userAccountId) {
+        return userAccountRepository.findById(userAccountId);
+    }
 
     public UserAccount signUpNewAccount(UserAccount userAccount)
     {

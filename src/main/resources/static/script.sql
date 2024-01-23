@@ -192,14 +192,36 @@ create table claim_requests
     id         bigint auto_increment primary key,
     amount int not null,
     request_date date not null,
-    request_content text not null,
+    accident_date date,
+    accident_place text,
+    examination_date date,
+    hospitalized_date date,
+    treatment_place text,
+    reason text,
+    consequence text,
+    type_treatment varchar(20),
+    end_date date,
+    start_date date,
+    death boolean,
+    injured boolean,
+    transport boolean,
+    medical_expense boolean,
+    benefit boolean,
     insurance_contract_id bigint not null,
     user_account_id bigint not null,
-    created_at timestamp              default current_timestamp                             null,
-    updated_at timestamp              default current_timestamp on update current_timestamp null,
-    status varchar(20) default 'unpaid',
+    status varchar(20) default 'pending',
     foreign key (insurance_contract_id) references insurance_contract(id),
     foreign key (user_account_id) references user_accounts(id)
+);
+
+create table document 
+(
+	id         bigint auto_increment primary key,
+    name text,
+    url text,
+    claim_id bigint,
+    created_at timestamp              default current_timestamp                             null,
+    foreign key (claim_id) references claim_requests(id)
 );
 
 create table insurance_benefit
