@@ -141,8 +141,6 @@ class UserAccountControllerTest {
         // Arrange
         String token = "Bearer validToken";
         String newPassword = "newPassword";
-        InsurancePayment insurancePayment = mock(InsurancePayment.class);
-        RegistrationForm registrationForm = mock(RegistrationForm.class);
         Authentication authentication = mock(Authentication.class);
 
         Map<String, Object> requestBody = new HashMap<>();
@@ -151,8 +149,6 @@ class UserAccountControllerTest {
 
         when(jwtService.extractUsername(token.substring(7))).thenReturn(email);
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
-        when(insurancePayment.getStatus()).thenReturn("unpaid");
-        when(insurancePayment.getRegistrationForm()).thenReturn(registrationForm);
         when(authentication.isAuthenticated()).thenReturn(true);
         when(userAccountService.updatePasswordByEmail(email,newPassword)).thenReturn(true);
         // Act

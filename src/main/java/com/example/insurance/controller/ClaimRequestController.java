@@ -115,7 +115,7 @@ public class ClaimRequestController {
     @PatchMapping("/refuse/{id}")
     public ResponseEntity<?> refuseClaimRequest(@PathVariable Long id) {
         ClaimRequest claimRequest = claimRequestService.updateStatusClaimRequest(id,"refused");
-        if(claimRequest.getId() != null )
+        if(claimRequest != null )
         {
             String content = "Gần đây, bạn đã yêu cầu bồi thường bảo hiểm của công ty chúng tôi. Chúng tôi đã xem xét và từ chối yêu cầu của bạn. Lý do bởi vì giấy tờ chứng minh chưa đủ điều kiện. Xin cảm ơn!";
             String subject = "Yêu cầu bồi thường của bạn bị từ chối";
