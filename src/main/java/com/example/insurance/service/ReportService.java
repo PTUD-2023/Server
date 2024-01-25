@@ -92,7 +92,7 @@ public class ReportService {
         return claimRequestRepository.generateMonthlyCompensationAmountReport(year);
     }
 
-    public List<IncomeReportDTO> test(int year)
+    public List<IncomeReportDTO> getIncomeReport(int year)
     {
         List<PaymentReportDTO> paymentReportDTO = generateMonthlyPaymentReport(year);
         List<CompensationReportDTO> compensationReportDTO = generateMonthlyCompensationAmountReport(year);

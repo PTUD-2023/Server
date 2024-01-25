@@ -74,10 +74,14 @@ public class ReportController {
         return ResponseEntity.ok(reportService.getCountContractsByPlan(month,year));
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<?> test()
+    @GetMapping("/income")
+    public ResponseEntity<?> GetIncomeReport(@RequestParam(defaultValue = "0")  int year)
     {
-        return ResponseEntity.ok(reportService.test(2024));
+        if (year == 0)
+        {
+            year = LocalDate.now().getYear();
+        }
+        return ResponseEntity.ok(reportService.getIncomeReport(year));
     }
 
 }
