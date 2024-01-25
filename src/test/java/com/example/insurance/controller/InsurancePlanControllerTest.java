@@ -47,7 +47,11 @@ public class InsurancePlanControllerTest {
                 .isInstanceOf(CustomErrorResponse.class)
                 .extracting("statusCode", "errorKey", "message")
                 .containsExactly(HttpStatus.NOT_FOUND.value(),"PlanNotFound","Cannot find insurance plan with id: " +id);
+
+        //verify
+        verify(insurancePlanService, times(1)).getInsurancePlanById(anyLong(), anyString());
     }
+
 
     @Test
     void testGetPlanWithPrice_WithValidInsurancePlanId_ShouldReturnOkResponse() {
@@ -64,6 +68,9 @@ public class InsurancePlanControllerTest {
         //Assert
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo(insurancePlanDTO);
+
+        //verify
+        verify(insurancePlanService, times(1)).getInsurancePlanById(anyLong(), anyString());
     }
 
     @Test
@@ -78,5 +85,8 @@ public class InsurancePlanControllerTest {
         //Assert
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo(insurancePlanDTOS);
+
+        //verify
+        verify(insurancePlanService, times(1)).getAllActivated();
     }
 }

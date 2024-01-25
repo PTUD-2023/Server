@@ -89,7 +89,6 @@ public class UserAccountController {
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(HttpStatus.BAD_REQUEST.value(),"WrongPassword","Wrong password",new Date()));
             }
-
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }

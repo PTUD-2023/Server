@@ -69,7 +69,7 @@ class InsurancePaymentControllerTest {
     }
 
     @Test
-    void getInsurancePaymentByUserAccountId_WithValidTokenAndUserDoesNotExist_ShouldReturnNotFoundResponse() {
+    void getInsurancePaymentByUserAccountId_WithValidTokenAndUserDoesNotExist_ShouldReturnNotFoundResponse()    {
         // Arrange
         String token = "Bearer validToken";
         String email = "test@example.com";
@@ -160,6 +160,7 @@ class InsurancePaymentControllerTest {
         when(insurancePaymentService.getInsurancePaymentById(anyLong())).thenReturn(null);
         when(jwtService.extractUsername(token.substring(7))).thenReturn(email);
         when(userAccountService.getUserByEmail(email)).thenReturn(Optional.of(userAccount));
+
         // Act
         ResponseEntity<?> responseEntity = insurancePaymentController.payInsurancePayment(token, 1L, requestBody);
 
@@ -251,5 +252,26 @@ class InsurancePaymentControllerTest {
                 .extracting("statusCode", "errorKey", "message")
                 .containsExactly(HttpStatus.NOT_FOUND.value(),"EmailNotFound","Could not find the user corresponding to the email");
 
+    }
+
+    @Test
+    public void getAllInsurancePayment_ShouldReturnInsurancePayments() {
+        // Arrange
+        int page = 0;
+        int size = 10;
+        List<InsurancePayment> mockInsurancePayments = Collections.singletonList(new InsurancePayment());
+        Page<InsurancePayment> mockPage = new PageImpl<>(mockInsurancePayments);
+
+        when(insurancePaymentService.getAllInsurancePayment(any(Pageable.class))).thenReturn(mockPage);
+        // Act
+        ResponseEntity<?> responseEntity = insurancePaymentController.getAllInsurancePayment(page, size);
+
+        // Assert
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo(mockPage);
+
+
+        // Verify that the service method was called with the correct argument
+        verify(insurancePaymentService, times(1)).getAllInsurancePayment(any(Pageable.class));
     }
 }

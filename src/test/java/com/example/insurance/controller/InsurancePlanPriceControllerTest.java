@@ -46,5 +46,7 @@ public class InsurancePlanPriceControllerTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo(insurancePlanPriceDTOS);
 
+        //verify
+        
     }
 }
