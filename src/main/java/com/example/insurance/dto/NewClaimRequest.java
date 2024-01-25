@@ -36,6 +36,12 @@ public class NewClaimRequest {
 
     private Boolean benefit;
 
+    private String paymentMethod;
+
+    private String stk;
+
+    private String bank;
+
     private Long insuranceContractId;
 
     private Long userAccountId;

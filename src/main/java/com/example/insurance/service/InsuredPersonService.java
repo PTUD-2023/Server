@@ -22,4 +22,7 @@ public class InsuredPersonService {
         return insuredPersonRepository.findById(id).orElse(null);
     }
 
+    public void updateInsuredPerson(InsuredPerson insuredPerson) {
+        insuredPersonRepository.save(insuredPerson);
+    }
 }

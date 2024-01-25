@@ -23,7 +23,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -52,132 +51,170 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signUpNewAccount(@RequestBody UserAccount userAccount)
-    {
+    public ResponseEntity<?> signUpNewAccount(@RequestBody UserAccount userAccount) {
         UserAccount newAccount = userAccountService.signUpNewAccount(userAccount);
-        if(newAccount.getId() > 0)
-        {
+        if (newAccount.getId() > 0) {
             sendConfirmCodeEmail(userAccount);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new CustomSuccessResponse("Account registration has email " + userAccount.getEmail() + " successful","AccountIsRegistered"));
-        }
-        else{
-            return ResponseEntity.badRequest().body( new CustomErrorResponse(HttpStatus.BAD_REQUEST.value(), "RegistrationFailed","Account registration failed",new Date()));
+                    .body(new CustomSuccessResponse("Account registration has email " + userAccount.getEmail() + " successful", "AccountIsRegistered"));
+        } else {
+            return ResponseEntity.badRequest().body(new CustomErrorResponse(HttpStatus.BAD_REQUEST.value(), "RegistrationFailed", "Account registration failed", new Date()));
         }
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> signIn(@RequestBody SignUpRequest signUpRequest)
-    {
-        if(signUpRequest.getEmail().isEmpty() || signUpRequest.getPassword().isEmpty())
-        {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(HttpStatus.BAD_REQUEST.value(), "LackOfEmailOrPassword","Missing Email or password",new Date()));
+    public ResponseEntity<?> signIn(@RequestBody SignUpRequest signUpRequest) {
+        if (signUpRequest.getEmail().isEmpty() || signUpRequest.getPassword().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(HttpStatus.BAD_REQUEST.value(), "LackOfEmailOrPassword", "Missing Email or password", new Date()));
         }
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signUpRequest.getEmail(), signUpRequest.getPassword()));
         Object principal = authentication.getPrincipal();
-        if(userAccountService.getUserByEmail(((UserDetails) principal).getUsername()).get().getStatus().equals("not_activated"))
-        {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(HttpStatus.BAD_REQUEST.value(), "UnverifiedAccount","Account has not verified email",new Date()));
-        }
-        else if (authentication.isAuthenticated()) {
+        if (userAccountService.getUserByEmail(((UserDetails) principal).getUsername()).get().getStatus().equals("not_activated")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(HttpStatus.BAD_REQUEST.value(), "UnverifiedAccount", "Account has not verified email", new Date()));
+        } else if (authentication.isAuthenticated()) {
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(signUpRequest.getEmail());
-            return ResponseEntity.status(HttpStatus.OK).body(new SignUpResponse(jwtService.generateToken(signUpRequest.getEmail()),refreshToken.getToken(),"Login is successfully","Success")) ;
+            return ResponseEntity.status(HttpStatus.OK).body(new SignUpResponse(jwtService.generateToken(signUpRequest.getEmail()), refreshToken.getToken(), "Login is successfully", "Success"));
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomErrorResponse(HttpStatus.NOT_FOUND.value(),"EmailNotFound","Could not find the user corresponding to the email",new Date()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomErrorResponse(HttpStatus.NOT_FOUND.value(), "EmailNotFound", "Could not find the user corresponding to the email", new Date()));
         }
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@RequestBody TokenRefreshRequest tokenRefreshRequest)
-    {
+    public ResponseEntity<?> refreshToken(@RequestBody TokenRefreshRequest tokenRefreshRequest) {
         String refreshToken = tokenRefreshRequest.getRefreshToken();
         return refreshTokenService.findByToken(refreshToken)
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUserAccount)
                 .map(userAccount -> {
                     String token = jwtService.generateToken(userAccount.getEmail());
-                    return ResponseEntity.ok().body(new SignUpResponse(token,refreshToken));
+                    return ResponseEntity.ok().body(new SignUpResponse(token, refreshToken));
                 })
-                .orElseThrow(()->
-                        new CustomException(HttpStatus.BAD_REQUEST.value(),"RefreshTokenIsInexist","Refresh token does not exist")
+                .orElseThrow(() ->
+                        new CustomException(HttpStatus.BAD_REQUEST.value(), "RefreshTokenIsInexist", "Refresh token does not exist")
                 );
 
     }
 
-    public void sendConfirmCodeEmail(UserAccount userAccount)
-    {
-        ConfirmCode confirmCode=  confirmCodeService.createConfirmCode(userAccount.getEmail());
-        String confirmationUrl =env.getProperty("client.URL")
-                +"/confirm/"+ Base64Encoding.encodeStringToBase64(userAccount.getEmail());
+    public void sendConfirmCodeEmail(UserAccount userAccount) {
+        ConfirmCode confirmCode = confirmCodeService.createConfirmCode(userAccount.getEmail());
+        String confirmationUrl = env.getProperty("client.URL")
+                + "/confirm/" + Base64Encoding.encodeStringToBase64(userAccount.getEmail());
 
         String to = userAccount.getEmail();
         String subject = confirmCode.getCode() + " là mã xác nhận của bạn";
         StringBuilder body = new StringBuilder();
         Resource resource = new ClassPathResource("static/emailTemplate.html");
         String htmlContent = ReadEmailTemplate.read(resource);
-        htmlContent = htmlContent.replace("${lastName}",userAccount.getLastName());
-        htmlContent = htmlContent.replace("${email}",userAccount.getEmail());
-        htmlContent = htmlContent.replace("${code}",confirmCode.getCode());
-        htmlContent = htmlContent.replace("${confirmUrl}",confirmationUrl);
+        htmlContent = htmlContent.replace("${lastName}", userAccount.getLastName());
+        htmlContent = htmlContent.replace("${email}", userAccount.getEmail());
+        htmlContent = htmlContent.replace("${code}", confirmCode.getCode());
+        htmlContent = htmlContent.replace("${confirmUrl}", confirmationUrl);
         body.append(htmlContent);
 
-        new Thread(()->{
-            try
-            {
-                myEmailService.sendSimpleMessage(to,subject,body.toString());
-            }
-            catch (Exception e)
-            {
+        new Thread(() -> {
+            try {
+                myEmailService.sendSimpleMessage(to, subject, body.toString());
+            } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
         }).start();
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<CustomSuccessResponse> confirmSignUpAccount(@RequestBody ConfirmCodeRequest confirmCodeRequest)
-    {
+    public ResponseEntity<CustomSuccessResponse> confirmSignUpAccount(@RequestBody ConfirmCodeRequest confirmCodeRequest) {
         Optional<ConfirmCode> confirmCode = confirmCodeService.findByCode(confirmCodeRequest.getCode());
-        if(confirmCode.isPresent())
-        {
-            if(confirmCodeService.isExpiredCode(confirmCode.get()))
-            {
-                throw new CustomException(HttpStatus.BAD_REQUEST.value(),"ConfirmCodeIsExpired","Verification code expired");
-            }
-            else{
+        if (confirmCode.isPresent()) {
+            if (confirmCodeService.isExpiredCode(confirmCode.get())) {
+                throw new CustomException(HttpStatus.BAD_REQUEST.value(), "ConfirmCodeIsExpired", "Verification code expired");
+            } else {
                 String email = confirmCode.get().getUserAccount().getEmail();
                 String emailRequest = Base64Encoding.decodeBase64ToString(confirmCodeRequest.getEmail());
-                if(emailRequest.equals(email))
-                {
-                    userAccountService.updateStatusByEmail(email,"activated");
+                if (emailRequest.equals(email)) {
+                    userAccountService.updateStatusByEmail(email, "activated");
                     confirmCodeService.deleteByCode(confirmCodeRequest.getCode());
                     return ResponseEntity.ok().body(new CustomSuccessResponse("Account confirmed successfully"));
-                }
-                else{
-                    throw new CustomException(HttpStatus.BAD_REQUEST.value(), "ConfirmCodeIsIncorrect","Verification code is wrong");
+                } else {
+                    throw new CustomException(HttpStatus.BAD_REQUEST.value(), "ConfirmCodeIsIncorrect", "Verification code is wrong");
                 }
             }
-        }
-        else{
-            throw new CustomException(HttpStatus.BAD_REQUEST.value(), "ConfirmCodeIsIncorrect","Verification code is wrong");
+        } else {
+            throw new CustomException(HttpStatus.BAD_REQUEST.value(), "ConfirmCodeIsIncorrect", "Verification code is wrong");
         }
     }
 
     @PostMapping("/resend")
-    public ResponseEntity<CustomSuccessResponse> resendConfirmCode(@RequestParam("email") String email)
-    {
+    public ResponseEntity<CustomSuccessResponse> resendConfirmCode(@RequestParam("email") String email) {
         String emailRequest = Base64Encoding.decodeBase64ToString(email);
         Optional<UserAccount> userAccount = userAccountService.getUserByEmail(emailRequest);
-        if(userAccount.isEmpty())
-        {
-            throw new CustomException(HttpStatus.BAD_REQUEST.value(), "InexistAccount","Account does not exist");
+        if (userAccount.isEmpty()) {
+            throw new CustomException(HttpStatus.BAD_REQUEST.value(), "InexistAccount", "Account does not exist");
         }
-        if(userAccount.get().getStatus().equals("activated"))
-        {
-            throw new CustomException(HttpStatus.BAD_REQUEST.value(), "VerifiedAccount","Account has email authentication");
+        if (userAccount.get().getStatus().equals("activated")) {
+            throw new CustomException(HttpStatus.BAD_REQUEST.value(), "VerifiedAccount", "Account has email authentication");
         }
         confirmCodeService.deleteAllByUserAccount(userAccount.get());
         sendConfirmCodeEmail(userAccount.get());
-        return ResponseEntity.ok().body(new CustomSuccessResponse("Resend confirmation code successfully"));
+        return ResponseEntity.ok().body(new CustomSuccessResponse("Resend reset password code successfully","Successfully"));
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam("email") String email) {
+        String emailRequest = Base64Encoding.decodeBase64ToString(email);
+        Optional<UserAccount> userAccount = userAccountService.getUserByEmail(emailRequest);
+        if (userAccount.isEmpty()) {
+            throw new CustomException(HttpStatus.BAD_REQUEST.value(), "InexistAccount", "Account does not exist");
+        }
+        if (userAccount.get().getStatus().equals("not_activated")) {
+            throw new CustomException(HttpStatus.BAD_REQUEST.value(), "UnverifiedAccount", "Account has not verified email");
+        }
+        confirmCodeService.deleteAllByUserAccount(userAccount.get());
+        sendResetPasswordEmail(userAccount.get());
+        return ResponseEntity.ok().body(new CustomSuccessResponse("Resend confirmation code successfully","Successfully"));
+    }
+
+    @PostMapping("/confirm-forgot-code")
+    public ResponseEntity<CustomSuccessResponse> confirmForgotPasswordCode(@RequestBody ConfirmCodeRequest confirmCodeRequest) {
+        Optional<ConfirmCode> confirmCode = confirmCodeService.findByCode(confirmCodeRequest.getCode());
+        if (confirmCode.isPresent()) {
+            if (confirmCodeService.isExpiredCode(confirmCode.get())) {
+                throw new CustomException(HttpStatus.BAD_REQUEST.value(), "ForgotPasswordCodeIsExpired", "Forgot Password Code is expired");
+            } else {
+                String email = confirmCode.get().getUserAccount().getEmail();
+                String emailRequest = Base64Encoding.decodeBase64ToString(confirmCodeRequest.getEmail());
+                if (emailRequest.equals(email)) {
+                    confirmCodeService.deleteByCode(confirmCodeRequest.getCode());
+                    return ResponseEntity.ok().body(new CustomSuccessResponse("Reset Password code is correct","successfully"));
+                } else {
+                    throw new CustomException(HttpStatus.BAD_REQUEST.value(), "ForgotPasswordCodeIsIncorrect", "Forgot Password Code is incorrect");
+                }
+            }
+        } else {
+            throw new CustomException(HttpStatus.BAD_REQUEST.value(), "ForgotPasswordCodeIsIncorrect", "Forgot Password Code is incorrect");
+        }
+    }
+
+    public void sendResetPasswordEmail(UserAccount userAccount) {
+        ConfirmCode confirmCode = confirmCodeService.createConfirmCode(userAccount.getEmail());
+        String confirmationUrl = env.getProperty("client.URL")
+                + "/forgot-password/" + Base64Encoding.encodeStringToBase64(userAccount.getEmail());
+
+        String to = userAccount.getEmail();
+        String subject = confirmCode.getCode() + " là mã đặt lại mật khẩu của bạn";
+        StringBuilder body = new StringBuilder();
+        Resource resource = new ClassPathResource("static/resetPasswordEmailTemplate.html");
+        String htmlContent = ReadEmailTemplate.read(resource);
+        htmlContent = htmlContent.replace("${lastName}", userAccount.getLastName());
+        htmlContent = htmlContent.replace("${email}", userAccount.getEmail());
+        htmlContent = htmlContent.replace("${code}", confirmCode.getCode());
+        htmlContent = htmlContent.replace("${confirmUrl}", confirmationUrl);
+        body.append(htmlContent);
+
+        new Thread(() -> {
+            try {
+                myEmailService.sendSimpleMessage(to, subject, body.toString());
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }).start();
+    }
 }

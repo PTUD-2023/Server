@@ -70,6 +70,15 @@ public class ClaimRequest {
     @Column(name = "benefit")
     private Boolean benefit;
 
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
+    @Column(name = "stk")
+    private String stk;
+
+    @Column(name = "bank")
+    private String bank;
+
     @OneToMany(mappedBy = "claimRequest", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     @JsonManagedReference
     List<Document> documents;

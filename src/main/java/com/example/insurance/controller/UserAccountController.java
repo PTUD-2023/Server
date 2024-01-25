@@ -2,6 +2,7 @@ package com.example.insurance.controller;
 
 import com.example.insurance.common.CustomErrorResponse;
 import com.example.insurance.common.CustomSuccessResponse;
+import com.example.insurance.component.Base64Encoding;
 import com.example.insurance.dto.UserAccountDTO;
 import com.example.insurance.service.JwtService;
 import com.example.insurance.service.UserAccountService;
@@ -91,5 +92,20 @@ public class UserAccountController {
 
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    }
+
+    @PatchMapping("/set-new-password")
+    public ResponseEntity<?> setNewPassword(@RequestBody Map<String, Object> requestBodyMap)
+    {
+        String newPassword = (String) requestBodyMap.get("newPassword");
+        String email = (String) requestBodyMap.get("email");
+        String emailRequest = Base64Encoding.decodeBase64ToString(email);
+        if(userAccountService.updatePasswordByEmail(emailRequest,newPassword))
+        {
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomSuccessResponse("Update user password successfully","UpdateSuccess"));
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CustomErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),"UpdateFailed","Update user password failed",new Date()));
+        }
     }
 }

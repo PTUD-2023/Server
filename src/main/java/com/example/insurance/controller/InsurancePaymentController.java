@@ -2,12 +2,11 @@ package com.example.insurance.controller;
 
 import com.example.insurance.common.CustomErrorResponse;
 import com.example.insurance.common.CustomSuccessResponse;
+import com.example.insurance.entity.InsuranceContract;
 import com.example.insurance.entity.InsurancePayment;
+import com.example.insurance.entity.InsuredPerson;
 import com.example.insurance.entity.UserAccount;
-import com.example.insurance.service.InsuranceContractService;
-import com.example.insurance.service.InsurancePaymentService;
-import com.example.insurance.service.JwtService;
-import com.example.insurance.service.UserAccountService;
+import com.example.insurance.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,13 +26,15 @@ public class InsurancePaymentController {
     private final JwtService jwtService;
     private final UserAccountService userAccountService;
     private final InsuranceContractService insuranceContractService;
+    private final InsuredPersonService insuredPersonService;
 
     @Autowired
-    public InsurancePaymentController(InsurancePaymentService insurancePaymentService, JwtService jwtService, UserAccountService userAccountService, InsuranceContractService insuranceContractService) {
+    public InsurancePaymentController(InsurancePaymentService insurancePaymentService, JwtService jwtService, UserAccountService userAccountService, InsuranceContractService insuranceContractService, InsuredPersonService insuredPersonService) {
         this.insurancePaymentService = insurancePaymentService;
         this.jwtService = jwtService;
         this.userAccountService = userAccountService;
         this.insuranceContractService = insuranceContractService;
+        this.insuredPersonService = insuredPersonService;
     }
 
     @GetMapping("/get")
@@ -81,8 +82,18 @@ public class InsurancePaymentController {
             insurancePayment.setImplementer(userAccountId);
             if (insurancePaymentService.updateInsurancePayment(insurancePayment))
             {
-                insuranceContractService.createInsuranceContract(insurancePayment.getRegistrationForm());
-                return ResponseEntity.ok(new CustomSuccessResponse("Payment successfully","PaymentSuccess"));
+                InsuranceContract insuranceContract = insuranceContractService.createInsuranceContract(insurancePayment.getRegistrationForm());
+                if(insuranceContract != null)
+                {
+                    InsuredPerson insuredPerson = insuranceContract.getRegistrationForm().getInsuredPerson();
+                    insuredPerson.setStatus("insured");
+                    insuredPersonService.updateInsuredPerson(insuredPerson);
+                    return ResponseEntity.ok(new CustomSuccessResponse("Payment successfully","PaymentSuccess"));
+                }
+                else
+                {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CustomErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),"InternalServerError","Could not create the insurance contract",new Date()));
+                }
             }
             else
             {

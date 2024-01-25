@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.time.Instant;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -49,7 +50,7 @@ public class ConfirmCodeService {
             SecureRandom random = new SecureRandom();
             int code = 100000 + random.nextInt(900000); // Tạo mã ngẫu nhiên từ 100000 đến 999999
             confirmCode.setUserAccount(userAccount.get());
-            confirmCode.setExpiryDate(Instant.now().plusMillis(1000*60*5));
+            confirmCode.setExpiryDate(LocalDateTime.now().plus(Duration.ofMinutes(5)));
             confirmCode.setCode(String.valueOf(code));
             confirmCode = confirmCodeRepository.save(confirmCode);
             return confirmCode;
@@ -62,7 +63,7 @@ public class ConfirmCodeService {
 
     public boolean isExpiredCode(ConfirmCode code)
     {
-        return code.getExpiryDate().compareTo(Instant.now()) < 0;
+        return code.getExpiryDate().compareTo(LocalDateTime.now()) < 0;
     }
 
 }

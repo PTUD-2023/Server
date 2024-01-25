@@ -58,6 +58,7 @@ public class ClaimRequestController {
                     Document document = new Document();
                     document.setName(file.getOriginalFilename());
                     document.setClaimRequest(claimRequest);
+                    document.setFileType(file.getContentType());
                     document.setUrl(s3Service.uploadFileToS3("insurance-doc",file));
                     documentService.createDocument(document);
                 }
@@ -72,7 +73,7 @@ public class ClaimRequestController {
     @GetMapping("/get-all")
     public ResponseEntity<?> getAllClaimRequest(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10")  int size)
     {
-        Pageable pageable = PageRequest.of(page,size, Sort.by("requestDate").descending());
+        Pageable pageable = PageRequest.of(page,size, Sort.by("id").descending());
         return ResponseEntity.ok(claimRequestService.getAllClaimRequest(pageable));
     }
 
@@ -85,7 +86,7 @@ public class ClaimRequestController {
             if(userAccount.isPresent())
             {
                 Long userAccountId = userAccount.get().getId();
-                Pageable pageable = PageRequest.of(page,size, Sort.by("requestDate").descending());
+                Pageable pageable = PageRequest.of(page,size, Sort.by("id").descending());
                 return ResponseEntity.ok(claimRequestService.getClaimRequestByUserAccountId(userAccountId,pageable));
             }
             else{
@@ -115,7 +116,7 @@ public class ClaimRequestController {
     @PatchMapping("/refuse/{id}")
     public ResponseEntity<?> refuseClaimRequest(@PathVariable Long id) {
         ClaimRequest claimRequest = claimRequestService.updateStatusClaimRequest(id,"refused");
-        if(claimRequest.getId() != null )
+        if(claimRequest!= null )
         {
             String content = "Gần đây, bạn đã yêu cầu bồi thường bảo hiểm của công ty chúng tôi. Chúng tôi đã xem xét và từ chối yêu cầu của bạn. Lý do bởi vì giấy tờ chứng minh chưa đủ điều kiện. Xin cảm ơn!";
             String subject = "Yêu cầu bồi thường của bạn bị từ chối";

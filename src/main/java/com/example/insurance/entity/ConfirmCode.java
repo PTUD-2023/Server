@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "confirm_code")
@@ -18,5 +20,5 @@ public class ConfirmCode {
     @Column(nullable = false,unique = true)
     private String code;
     @Column(nullable = false)
-    private Instant expiryDate;
+    private LocalDateTime expiryDate;
 }

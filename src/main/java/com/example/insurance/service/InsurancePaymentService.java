@@ -3,10 +3,14 @@ package com.example.insurance.service;
 import com.example.insurance.entity.InsurancePayment;
 import com.example.insurance.entity.RegistrationForm;
 import com.example.insurance.repository.InsurancePaymentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -14,6 +18,7 @@ import java.util.Date;
 @Service
 public class InsurancePaymentService {
     private final InsurancePaymentRepository insurancePaymentRepository;
+    private static final Logger logger = LoggerFactory.getLogger("Insurance Server");
 
     @Autowired
     public InsurancePaymentService(InsurancePaymentRepository insurancePaymentRepository) {
@@ -57,5 +62,13 @@ public class InsurancePaymentService {
 
     public Page<InsurancePayment> getAllInsurancePayment(Pageable pageable) {
         return insurancePaymentRepository.findAll(pageable);
+    }
+
+    @Scheduled( initialDelay = 1000*60*30,fixedRate = 1000*60*60*2)
+    @Transactional
+    public void updateOverduePaymentsStatus() {
+
+        insurancePaymentRepository.updateOverduePaymentsStatus();
+        logger.info("Cleaned up all unconfirmed accounts in the database");
     }
 }

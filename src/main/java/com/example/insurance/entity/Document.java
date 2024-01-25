@@ -21,6 +21,9 @@ public class Document {
     private String name;
     private String url;
 
+    @Column(name = "file_type")
+    private String fileType;
+
     @ManyToOne
     @JoinColumn(name = "claim_id", referencedColumnName = "id")
     @JsonBackReference

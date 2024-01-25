@@ -32,7 +32,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final RequestMatcher uriMatcher = new OrRequestMatcher(
             new AntPathRequestMatcher("/v1/authenticate/**"),
             new AntPathRequestMatcher("/v1/insurance-plan/**"),
-            new AntPathRequestMatcher("/v1/insurance-price/**")
+            new AntPathRequestMatcher("/v1/insurance-price/**"),
+            new AntPathRequestMatcher("/v1/user/set-new-password")
     );
 
     @Autowired
